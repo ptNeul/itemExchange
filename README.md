@@ -31,7 +31,7 @@
 
 ## 💻 ERD
 
-![ERD](https://github.com/ptNeul/itemExchange/raw/main/ERD.JPG)
+![ERD](https://github.com/ptNeul/itemExchange/raw/main/ERD.JPG?v=2)
 - role이 SELLER일 경우 판매자 정보를 추가 등록
 - TINYINT(DB)+Enum(Code) 매핑 방식을 사용
 - 관리자가 미리 등록해 둔 아이템 정보를 판매자가 가져와서 등록
