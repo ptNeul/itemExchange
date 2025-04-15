@@ -1,16 +1,7 @@
 package com.neul.itemexchange.service;
 
-import static com.neul.itemexchange.exception.user.UserErrorCode.ALREADY_CREATED_ADMIN;
-import static com.neul.itemexchange.exception.user.UserErrorCode.INSUFFICIENT_BALANCE;
-import static com.neul.itemexchange.exception.user.UserErrorCode.INVALID_CHARGE_AMOUNT;
-import static com.neul.itemexchange.exception.user.UserErrorCode.INVALID_PASSWORD;
-import static com.neul.itemexchange.exception.user.UserErrorCode.INVALID_TRANSFER_AMOUNT;
-import static com.neul.itemexchange.exception.user.UserErrorCode.MISSING_SELLER_INFO;
-import static com.neul.itemexchange.exception.user.UserErrorCode.ONLY_BUYER_CAN_CHARGE;
-import static com.neul.itemexchange.exception.user.UserErrorCode.USER_NOT_FOUND;
-import static com.neul.itemexchange.type.UserRole.ADMIN;
-import static com.neul.itemexchange.type.UserRole.BUYER;
-import static com.neul.itemexchange.type.UserRole.SELLER;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.*;
+import static com.neul.itemexchange.type.UserRole.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,7 +16,7 @@ import com.neul.itemexchange.dto.user.UserPatchRequestDto;
 import com.neul.itemexchange.dto.user.UserRegisterRequestDto;
 import com.neul.itemexchange.dto.user.UserResponseDto;
 import com.neul.itemexchange.dto.user.UserSimpleRequestDto;
-import com.neul.itemexchange.exception.user.UserException;
+import com.neul.itemexchange.exception.custom.UserException;
 import com.neul.itemexchange.mapper.UserMapper;
 import com.neul.itemexchange.repository.SellerRepository;
 import com.neul.itemexchange.repository.UserRepository;

@@ -23,31 +23,31 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
   private final UserService userService;
 
-  @PostMapping("/login")
+  @PostMapping("/sessions")
   public ResponseEntity<UserResponseDto> login(@RequestBody UserSimpleRequestDto dto,
       HttpSession session) {
     UserResponseDto result = userService.login(dto, session);
     return ResponseEntity.ok(result);
   }
 
-  @PostMapping("/logout")
+  @DeleteMapping("/sessions")
   public ResponseEntity<Void> logout(HttpSession session) {
     session.invalidate();
     return ResponseEntity.ok().build();
   }
 
-  @PostMapping("/register")
+  @PostMapping
   public ResponseEntity<UserResponseDto> registerUser(@RequestBody UserRegisterRequestDto dto) {
     UserResponseDto result = userService.registerUser(dto);
     return ResponseEntity.status(CREATED).body(result);
   }
 
-  @PatchMapping("/patch")
+  @PatchMapping("/me")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<UserResponseDto> patchUser(@RequestBody UserPatchRequestDto dto,
       @AuthenticationPrincipal UserDetails userDetails) {
@@ -55,14 +55,14 @@ public class UserController {
     return ResponseEntity.ok(result);
   }
 
-  @DeleteMapping("/delete")
+  @DeleteMapping("/me")
   @PreAuthorize("isAuthenticated")
   public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
     userService.deleteUser(userDetails.getUsername());
     return ResponseEntity.noContent().build();
   }
 
-  @PostMapping("/charge")
+  @PostMapping("/me/charge")
   @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Void> charge(@RequestParam long amount,
       @AuthenticationPrincipal UserDetails userDetails) {

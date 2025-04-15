@@ -1,7 +1,6 @@
 package com.neul.itemexchange.exception;
 
-import com.neul.itemexchange.exception.user.UserException;
-import java.util.*;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -9,13 +8,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(UserException.class)
-  public ResponseEntity<?> handleUserException(UserException ex) {
+  @ExceptionHandler(BaseException.class)
+  public ResponseEntity<?> handleBaseException(BaseException ex) {
+    ErrorCode errorCode = ex.getErrorCode();
+
     return ResponseEntity
-        .status(ex.getErrorCode().getStatus())
+        .status(errorCode.getStatus())
         .body(Map.of(
-            "code", ex.getErrorCode().name(),
-            "message", ex.getErrorCode().getMessage()
+            "code", errorCode.getClass().getSimpleName() + "." + errorCode.toString(),
+            "message", errorCode.getMessage()
         ));
   }
 }

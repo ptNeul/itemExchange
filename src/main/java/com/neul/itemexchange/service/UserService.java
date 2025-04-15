@@ -1,6 +1,6 @@
 package com.neul.itemexchange.service;
 
-import static com.neul.itemexchange.exception.user.UserErrorCode.*;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.*;
 import static com.neul.itemexchange.type.UserRole.*;
 
 import com.neul.itemexchange.domain.Seller;
@@ -9,7 +9,7 @@ import com.neul.itemexchange.dto.user.UserPatchRequestDto;
 import com.neul.itemexchange.dto.user.UserRegisterRequestDto;
 import com.neul.itemexchange.dto.user.UserResponseDto;
 import com.neul.itemexchange.dto.user.UserSimpleRequestDto;
-import com.neul.itemexchange.exception.user.UserException;
+import com.neul.itemexchange.exception.custom.UserException;
 import com.neul.itemexchange.mapper.UserMapper;
 import com.neul.itemexchange.repository.SellerRepository;
 import com.neul.itemexchange.repository.UserRepository;

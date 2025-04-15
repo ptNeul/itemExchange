@@ -45,16 +45,4 @@ public class User {
   @Builder.Default
   @Column(nullable = false)
   private long balance = 0L;
-
-  public void patchFrom(UserPatchRequestDto dto) {
-    if (dto.getPassword() != null) {
-      this.password = dto.getPassword();
-    }
-    if (dto.getEmail() != null) {
-      this.email = dto.getEmail();
-    }
-    if (dto.getNickname() != null) {
-      this.nickname = dto.getNickname();
-    }
-  }
 }

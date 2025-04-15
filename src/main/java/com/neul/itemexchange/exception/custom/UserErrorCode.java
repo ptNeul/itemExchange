@@ -1,10 +1,11 @@
-package com.neul.itemexchange.exception.user;
+package com.neul.itemexchange.exception.custom;
 
+import com.neul.itemexchange.exception.ErrorCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public enum UserErrorCode {
+public enum UserErrorCode implements ErrorCode {
   ALREADY_CREATED_ADMIN(HttpStatus.BAD_REQUEST, "관리자 계정은 이미 존재합니다."),
   DUPLICATE_USERNAME(HttpStatus.BAD_REQUEST, "이미 존재하는 아이디입니다."),
   DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 존재하는 이메일입니다."),
@@ -15,8 +16,7 @@ public enum UserErrorCode {
   INVALID_CHARGE_AMOUNT(HttpStatus.BAD_REQUEST, "충전금액은 0보다 커야 합니다."),
   ONLY_BUYER_CAN_CHARGE(HttpStatus.BAD_REQUEST, "충전은 구매자만 가능합니다."),
   INVALID_TRANSFER_AMOUNT(HttpStatus.BAD_REQUEST, "금액이 0보다 커야 합니다."),
-  INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "잔액이 부족합니다.")
-  ;
+  INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "잔액이 부족합니다.");
 
   private final HttpStatus status;
   private final String message;

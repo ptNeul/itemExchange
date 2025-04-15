@@ -17,24 +17,20 @@ public class SecurityConfig {
     http
         .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 기능 끄기
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/admin/register", "/user/login", "/user/logout", "/user/register").permitAll()
-            .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자
-            .requestMatchers("/seller/**").hasRole("SELLER") // 판매자
-            .requestMatchers("/buyer/**").hasRole("BUYER") // 구매자
-            .requestMatchers("/", "/register", "/login").permitAll() // 누구나
+            .requestMatchers(
+                "/admins",
+                "/users",
+                "/users/sessions",
+                "/users/register"
+            ).permitAll()
+            .requestMatchers("/admins/**").hasRole("ADMIN") // 관리자
+            .requestMatchers("/sellers/**").hasRole("SELLER") // 판매자
+            .requestMatchers("/buyers/**").hasRole("BUYER") // 구매자
             .anyRequest().authenticated()
         )
         .formLogin(AbstractHttpConfigurer::disable)
-//        .formLogin(form -> form
-//            .loginPage("/login") // 사용자 정의 로그인 페이지
-//            .loginProcessingUrl("/login") // 로그인 폼 전송시 이 URL로 POST요청
-//            .defaultSuccessUrl("/", true) // 로그인 성공시 이동
-//            .failureUrl("/login?error=true") // 로그인 실패시 이동
-//            .permitAll()
-//        )
         .logout(logout -> logout
-            .logoutUrl("/logout") // 로그아웃 시 이동
-            .logoutSuccessUrl("/") // 로그아웃 후 이동
+            .logoutUrl("/user/sessions") // 로그아웃 시 이동
             .invalidateHttpSession(true) // 세션 무효화
             .deleteCookies("JSESSIONID") // 세션 쿠키 삭제
         );
