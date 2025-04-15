@@ -1,7 +1,18 @@
 package com.neul.itemexchange.service;
 
-import static com.neul.itemexchange.exception.custom.UserErrorCode.*;
-import static com.neul.itemexchange.type.UserRole.*;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.ALREADY_CREATED_ADMIN;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.DUPLICATE_EMAIL;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.DUPLICATE_NICKNAME;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.DUPLICATE_USERNAME;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.INSUFFICIENT_BALANCE;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.INVALID_CHARGE_AMOUNT;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.INVALID_TRANSFER_AMOUNT;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.MISSING_SELLER_INFO;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.ONLY_BUYER_CAN_CHARGE;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.USER_NOT_FOUND;
+import static com.neul.itemexchange.type.UserRole.ADMIN;
+import static com.neul.itemexchange.type.UserRole.BUYER;
+import static com.neul.itemexchange.type.UserRole.SELLER;
 
 import com.neul.itemexchange.domain.Seller;
 import com.neul.itemexchange.domain.User;
@@ -13,13 +24,12 @@ import com.neul.itemexchange.exception.custom.UserException;
 import com.neul.itemexchange.mapper.UserMapper;
 import com.neul.itemexchange.repository.SellerRepository;
 import com.neul.itemexchange.repository.UserRepository;
-import jakarta.servlet.http.HttpSession;
+import com.neul.itemexchange.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +43,7 @@ public class UserService {
   private final SellerRepository sellerRepository;
   private final PasswordEncoder passwordEncoder;
   private final UserMapper userMapper;
+  private final AuthenticationManager authenticationManager;
 
   /**
    * 어드민 계정 등록
@@ -53,38 +64,19 @@ public class UserService {
   /**
    * 로그인
    */
-  public UserResponseDto login(UserSimpleRequestDto dto, HttpSession session) {
+  public UserResponseDto login(UserSimpleRequestDto dto) {
+    System.out.println(">>> UserService.login() 진입");
 
-    // 유저 조회
-    User user = userRepository.findById(dto.getUsername())
-        .orElseThrow(() -> new UserException(USER_NOT_FOUND));
-
-    // 비밀번호 확인
-    if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-      throw new UserException(INVALID_PASSWORD);
-    }
-
-    // UserDetails 생성
-    UserDetails userDetails = org.springframework.security.core.userdetails.User
-        .withUsername(user.getUsername())
-        .password(user.getPassword())
-        .roles(user.getRole().name())
-        .build();
-
-    // Authentication 객체 생성
-    Authentication authentication = new UsernamePasswordAuthenticationToken(
-        userDetails, null, userDetails.getAuthorities()
+    Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword())
     );
 
-    // SecurityContext 에 인증 정보 저장
-    SecurityContext securityContext = SecurityContextHolder.getContext();
-    securityContext.setAuthentication(authentication);
+    System.out.println(">>> 인증 완료");
 
-    // 세션에 SecurityContext저장
-    session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-    // 응답 반환
-    return userMapper.toDto(user);
+    return userMapper.toDto(userDetails.getUser());
   }
 
   /**
@@ -187,8 +179,7 @@ public class UserService {
   }
 
   /**
-   * 구매 발생 시 buyer → seller 잔액 이동
-   * 아직 구매 시스템이 없으므로 외부 호출 X
+   * 구매 발생 시 buyer → seller 잔액 이동 아직 구매 시스템이 없으므로 외부 호출 X
    */
   public void transferBalance(String buyerUsername, String sellerUsername, long amount) {
     if (amount <= 0) {

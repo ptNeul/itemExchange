@@ -1,5 +1,7 @@
 package com.neul.itemexchange.mapper;
 
+import static com.neul.itemexchange.constant.UserConstants.*;
+
 import com.neul.itemexchange.domain.Seller;
 import com.neul.itemexchange.domain.User;
 import com.neul.itemexchange.dto.user.UserRegisterRequestDto;
@@ -25,8 +27,8 @@ public class UserMapper {
     return User.builder()
         .username(dto.getUsername())
         .password(dto.getPassword())
-        .email("admin@system")
-        .nickname("관리자")
+        .email(ADMIN_EMAIL)
+        .nickname(ADMIN_NICKNAME)
         .role(UserRole.ADMIN)
         .balance(0L)
         .build();

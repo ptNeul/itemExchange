@@ -1,11 +1,19 @@
 package com.neul.itemexchange.service;
 
-import static com.neul.itemexchange.exception.custom.UserErrorCode.*;
-import static com.neul.itemexchange.type.UserRole.*;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.ALREADY_CREATED_ADMIN;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.INSUFFICIENT_BALANCE;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.INVALID_CHARGE_AMOUNT;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.INVALID_PASSWORD;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.INVALID_TRANSFER_AMOUNT;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.MISSING_SELLER_INFO;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.ONLY_BUYER_CAN_CHARGE;
+import static com.neul.itemexchange.exception.custom.UserErrorCode.USER_NOT_FOUND;
+import static com.neul.itemexchange.type.UserRole.ADMIN;
+import static com.neul.itemexchange.type.UserRole.BUYER;
+import static com.neul.itemexchange.type.UserRole.SELLER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +28,7 @@ import com.neul.itemexchange.exception.custom.UserException;
 import com.neul.itemexchange.mapper.UserMapper;
 import com.neul.itemexchange.repository.SellerRepository;
 import com.neul.itemexchange.repository.UserRepository;
+import com.neul.itemexchange.security.CustomUserDetails;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +36,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 class UserServiceTest {
@@ -42,6 +54,9 @@ class UserServiceTest {
 
   @Mock
   private PasswordEncoder passwordEncoder;
+
+  @Mock
+  private AuthenticationManager authenticationManager;
 
   @Mock
   private UserMapper userMapper;
@@ -117,6 +132,11 @@ class UserServiceTest {
         .role(ADMIN)
         .balance(0L)
         .build();
+
+    CustomUserDetails userDetails = new CustomUserDetails(userEntity);
+    Authentication authentication = new UsernamePasswordAuthenticationToken(
+        userDetails, null, userDetails.getAuthorities());
+
     UserResponseDto response = UserResponseDto.builder()
         .username("admin")
         .email("admin@system")
@@ -125,31 +145,29 @@ class UserServiceTest {
         .balance(0L)
         .build();
 
-    when(userRepository.findById("admin")).thenReturn(Optional.of(userEntity));
-    when(passwordEncoder.matches("pass", "encodedPw")).thenReturn(true);
+    when(authenticationManager.authenticate(any())).thenReturn(authentication);
     when(userMapper.toDto(userEntity)).thenReturn(response);
 
     // when
-    UserResponseDto result = userService.login(request, session);
+    UserResponseDto result = userService.login(request);
 
     // then
     assertThat(result.getUsername()).isEqualTo("admin");
-    verify(session).setAttribute(eq("SPRING_SECURITY_CONTEXT"), any());
+    assertThat(result.getRole()).isEqualTo(ADMIN);
   }
 
   @Test
   void login_userNotFound() {
     // given
     UserSimpleRequestDto dto = new UserSimpleRequestDto("janna", "1234");
-    when(userRepository.findById("janna")).thenReturn(Optional.empty());
+
+    when(authenticationManager.authenticate(any())).thenThrow(new UserException(USER_NOT_FOUND));
 
     // when
     // then
-    assertThatThrownBy(() -> userService.login(dto, session))
+    assertThatThrownBy(() -> userService.login(dto))
         .isInstanceOf(UserException.class)
         .hasMessage(USER_NOT_FOUND.getMessage());
-
-    verify(session, never()).setAttribute(any(), any());
   }
 
   @Test
@@ -162,16 +180,13 @@ class UserServiceTest {
         .password("encodedPw")
         .build();
 
-    when(userRepository.findById("janna")).thenReturn(Optional.of(user));
-    when(passwordEncoder.matches("1234", "encodedPw")).thenReturn(false);
+    when(authenticationManager.authenticate(any())).thenThrow(new UserException(INVALID_PASSWORD));
 
     // when
     // then
-    assertThatThrownBy(() -> userService.login(dto, session))
+    assertThatThrownBy(() -> userService.login(dto))
         .isInstanceOf(UserException.class)
         .hasMessage(INVALID_PASSWORD.getMessage());
-
-    verify(session, never()).setAttribute(any(), any());
   }
 
   @Test
