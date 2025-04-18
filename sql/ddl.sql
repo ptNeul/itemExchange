@@ -30,6 +30,7 @@ create table item_listing (
   foreign key (seller_id) references user(username) on delete cascade,
 	foreign key (item_id) references item_metadata(item_id) on delete cascade
 );
+alter table item_listing add column quantity int not null default 1 after price;
 
 create table item_trade_history (
   history_id bigint not null auto_increment primary key,
