@@ -18,8 +18,6 @@ import com.neul.itemexchange.mapper.ItemMetadataMapper;
 import com.neul.itemexchange.repository.ItemMetadataRepository;
 import java.util.List;
 import java.util.Optional;
-import org.apache.tomcat.util.http.fileupload.MultipartStream.ItemInputStream;
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess.Item;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
