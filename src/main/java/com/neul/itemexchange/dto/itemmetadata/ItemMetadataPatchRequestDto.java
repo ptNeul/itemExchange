@@ -6,6 +6,6 @@ import lombok.*;
 @Setter
 public class ItemMetadataPatchRequestDto {
   private String itemName;
-  private String image;
+  private String imageUrl;
   private String detail;
 }

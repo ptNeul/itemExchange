@@ -1,6 +1,7 @@
 package com.neul.itemexchange.mapper;
 
-import static com.neul.itemexchange.constant.UserConstants.*;
+import static com.neul.itemexchange.constant.UserConstants.ADMIN_EMAIL;
+import static com.neul.itemexchange.constant.UserConstants.ADMIN_NICKNAME;
 
 import com.neul.itemexchange.domain.Seller;
 import com.neul.itemexchange.domain.User;

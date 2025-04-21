@@ -11,7 +11,7 @@ public class ItemMetadataMapper {
   public ItemMetadata toEntity(ItemMetadataRequestDto dto) {
     return ItemMetadata.builder()
         .itemName(dto.getItemName())
-        .image(dto.getImage())
+        .imageUrl(dto.getImageUrl())
         .detail(dto.getDetail())
         .build();
   }
@@ -20,7 +20,7 @@ public class ItemMetadataMapper {
     return ItemMetadataResponseDto.builder()
         .itemId(item.getItemId())
         .itemName(item.getItemName())
-        .image(item.getImage())
+        .imageUrl(item.getImageUrl())
         .detail(item.getDetail())
         .build();
   }

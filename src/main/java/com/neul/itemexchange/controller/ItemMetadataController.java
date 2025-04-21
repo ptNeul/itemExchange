@@ -4,7 +4,7 @@ import com.neul.itemexchange.dto.itemmetadata.ItemMetadataPatchRequestDto;
 import com.neul.itemexchange.dto.itemmetadata.ItemMetadataRequestDto;
 import com.neul.itemexchange.dto.itemmetadata.ItemMetadataResponseDto;
 import com.neul.itemexchange.service.ItemMetadataService;
-import java.util.*;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

@@ -31,16 +31,17 @@ import com.neul.itemexchange.repository.UserRepository;
 import com.neul.itemexchange.security.CustomUserDetails;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
   @InjectMocks
@@ -64,11 +65,6 @@ class UserServiceTest {
   @Mock
   private HttpSession session;
 
-  @BeforeEach
-  void setUp() {
-    MockitoAnnotations.openMocks(this);
-  }
-
   @Test
   void registerAdmin() {
     // given
@@ -91,7 +87,7 @@ class UserServiceTest {
 
     when(userRepository.existsByRole(ADMIN)).thenReturn(false);
     when(userMapper.toAdminEntity(request)).thenReturn(userEntity);
-    when(passwordEncoder.encode("1234")).thenReturn("encodedPw");
+    when(passwordEncoder.encode("pass")).thenReturn("encodedPw");
     when(userRepository.save(userEntity)).thenReturn(userEntity);
     when(userMapper.toDto(userEntity)).thenReturn(response);
 

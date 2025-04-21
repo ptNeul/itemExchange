@@ -65,14 +65,10 @@ public class UserService {
    * 로그인
    */
   public UserResponseDto login(UserSimpleRequestDto dto) {
-    System.out.println(">>> UserService.login() 진입");
 
     Authentication authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword())
     );
-
-    System.out.println(">>> 인증 완료");
-    System.out.println("현재 로그인된 권한: " + authentication.getAuthorities());
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
     CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

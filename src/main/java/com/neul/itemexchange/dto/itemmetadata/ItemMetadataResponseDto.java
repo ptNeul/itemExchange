@@ -11,6 +11,6 @@ public class ItemMetadataResponseDto {
 
   private Long itemId;
   private String itemName;
-  private String image;
+  private String imageUrl;
   private String detail;
 }
