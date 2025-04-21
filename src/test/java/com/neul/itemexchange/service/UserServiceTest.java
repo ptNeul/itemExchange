@@ -11,8 +11,8 @@ import static com.neul.itemexchange.exception.custom.UserErrorCode.USER_NOT_FOUN
 import static com.neul.itemexchange.type.UserRole.ADMIN;
 import static com.neul.itemexchange.type.UserRole.BUYER;
 import static com.neul.itemexchange.type.UserRole.SELLER;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;

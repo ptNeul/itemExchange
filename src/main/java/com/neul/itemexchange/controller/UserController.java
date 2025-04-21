@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +34,10 @@ public class UserController {
   public ResponseEntity<UserResponseDto> login(@RequestBody UserSimpleRequestDto dto,
       HttpSession session) {
     UserResponseDto result = userService.login(dto);
-    session.setAttribute("SPRING_SEQURITY_CONTEXT", SecurityContextHolder.getContext());
+    session.setAttribute(
+        HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+        SecurityContextHolder.getContext()
+    );
     return ResponseEntity.ok(result);
   }
 
@@ -58,7 +62,7 @@ public class UserController {
   }
 
   @DeleteMapping("/me")
-  @PreAuthorize("isAuthenticated")
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
     userService.deleteUser(userDetails.getUsername());
     return ResponseEntity.noContent().build();

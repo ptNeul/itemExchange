@@ -72,6 +72,7 @@ public class UserService {
     );
 
     System.out.println(">>> 인증 완료");
+    System.out.println("현재 로그인된 권한: " + authentication.getAuthorities());
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
     CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
