@@ -48,7 +48,7 @@ public class ItemMetadataService {
   @Transactional(readOnly = true)
   public ItemMetadataResponseDto readOne(Long itemId) {
     ItemMetadata entity = itemMetadataRepository.findById(itemId)
-        .orElseThrow(() -> new ItemMetadataException(ITEM_NOT_FOUND));
+        .orElseThrow(() -> new ItemMetadataException(ITEM_METADATA_NOT_FOUND));
 
     return itemMetadataMapper.toDto(entity);
   }
@@ -56,7 +56,7 @@ public class ItemMetadataService {
   @Transactional
   public ItemMetadataResponseDto patch(Long itemId, ItemMetadataPatchRequestDto dto) {
     ItemMetadata item = itemMetadataRepository.findById(itemId)
-        .orElseThrow(() -> new ItemMetadataException(ITEM_NOT_FOUND));
+        .orElseThrow(() -> new ItemMetadataException(ITEM_METADATA_NOT_FOUND));
 
     if (dto.getItemName() != null) {
       if (itemMetadataRepository.existsByItemName(dto.getItemName()) &&
@@ -84,7 +84,7 @@ public class ItemMetadataService {
   @Transactional
   public void delete(Long itemId) {
     ItemMetadata item = itemMetadataRepository.findById(itemId)
-        .orElseThrow(() -> new ItemMetadataException(ITEM_NOT_FOUND));
+        .orElseThrow(() -> new ItemMetadataException(ITEM_METADATA_NOT_FOUND));
 
     itemMetadataRepository.delete(item);
   }

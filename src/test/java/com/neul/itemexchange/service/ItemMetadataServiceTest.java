@@ -3,7 +3,7 @@ package com.neul.itemexchange.service;
 
 import static com.neul.itemexchange.exception.custom.ItemMetadataErrorCode.DUPLICATE_IMAGE;
 import static com.neul.itemexchange.exception.custom.ItemMetadataErrorCode.DUPLICATE_ITEM_NAME;
-import static com.neul.itemexchange.exception.custom.ItemMetadataErrorCode.ITEM_NOT_FOUND;
+import static com.neul.itemexchange.exception.custom.ItemMetadataErrorCode.ITEM_METADATA_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
@@ -200,7 +200,7 @@ class ItemMetadataServiceTest {
     // then
     assertThatThrownBy(() -> itemMetadataService.readOne(999L))
         .isInstanceOf(ItemMetadataException.class)
-        .hasMessage(ITEM_NOT_FOUND.getMessage());
+        .hasMessage(ITEM_METADATA_NOT_FOUND.getMessage());
   }
 
   @Test
@@ -249,7 +249,7 @@ class ItemMetadataServiceTest {
     // then
     assertThatThrownBy(() -> itemMetadataService.patch(itemId, dto))
         .isInstanceOf(ItemMetadataException.class)
-        .hasMessage(ITEM_NOT_FOUND.getMessage());
+        .hasMessage(ITEM_METADATA_NOT_FOUND.getMessage());
   }
 
   @Test
@@ -306,6 +306,6 @@ class ItemMetadataServiceTest {
     // then
     assertThatThrownBy(() -> itemMetadataService.delete(itemId))
         .isInstanceOf(ItemMetadataException.class)
-        .hasMessage(ITEM_NOT_FOUND.getMessage());
+        .hasMessage(ITEM_METADATA_NOT_FOUND.getMessage());
   }
 }

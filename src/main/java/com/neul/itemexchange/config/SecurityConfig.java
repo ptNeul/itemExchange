@@ -31,7 +31,12 @@ public class SecurityConfig {
             .requestMatchers("/buyers/**").hasRole("BUYER") // 구매자
             .anyRequest().authenticated()
         )
-        .formLogin(AbstractHttpConfigurer::disable);
+        .formLogin(AbstractHttpConfigurer::disable)
+        .sessionManagement(session -> session
+            .sessionFixation().migrateSession()
+            .maximumSessions(1)
+            .maxSessionsPreventsLogin(false)
+        );
 
     return http.build();
   }
