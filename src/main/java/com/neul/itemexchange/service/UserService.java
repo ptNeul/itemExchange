@@ -176,7 +176,7 @@ public class UserService {
   }
 
   /**
-   * 구매 발생 시 buyer → seller 잔액 이동 아직 구매 시스템이 없으므로 외부 호출 X
+   * 구매 발생 시 buyer → seller 잔액 이동
    */
   public void transferBalance(String buyerUsername, String sellerUsername, long amount) {
     if (amount <= 0) {
