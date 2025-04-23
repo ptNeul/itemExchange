@@ -3,7 +3,7 @@ package com.neul.itemexchange.service;
 
 import static com.neul.itemexchange.exception.custom.ItemMetadataErrorCode.DUPLICATE_IMAGE;
 import static com.neul.itemexchange.exception.custom.ItemMetadataErrorCode.DUPLICATE_ITEM_NAME;
-import static com.neul.itemexchange.exception.custom.ItemMetadataErrorCode.ITEM_NOT_FOUND;
+import static com.neul.itemexchange.exception.custom.ItemMetadataErrorCode.ITEM_METADATA_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
@@ -18,12 +18,13 @@ import com.neul.itemexchange.mapper.ItemMetadataMapper;
 import com.neul.itemexchange.repository.ItemMetadataRepository;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class ItemMetadataServiceTest {
 
   @InjectMocks
@@ -35,17 +36,12 @@ class ItemMetadataServiceTest {
   @Mock
   private ItemMetadataMapper itemMetadataMapper;
 
-  @BeforeEach
-  void setUp() {
-    MockitoAnnotations.openMocks(this);
-  }
-
   @Test
   void create() {
     // given
     ItemMetadataRequestDto dto = ItemMetadataRequestDto.builder()
         .itemName("라바돈의 죽음모자")
-        .image("http://dummy.image.link/rabadon")
+        .imageUrl("http://dummy.image.link/rabadon")
         .detail("주문력 130\n"
             + " 신비한 작품\n"
             + " 총 주문력이 30% 증가합니다.")
@@ -54,19 +50,19 @@ class ItemMetadataServiceTest {
     ItemMetadata entity = ItemMetadata.builder()
         .itemId(1L)
         .itemName(dto.getItemName())
-        .image(dto.getImage())
+        .imageUrl(dto.getImageUrl())
         .detail(dto.getDetail())
         .build();
 
     ItemMetadataResponseDto responseDto = ItemMetadataResponseDto.builder()
         .itemId(1L)
         .itemName(dto.getItemName())
-        .image(dto.getImage())
+        .imageUrl(dto.getImageUrl())
         .detail(dto.getDetail())
         .build();
 
     when(itemMetadataRepository.existsByItemName(dto.getItemName())).thenReturn(false);
-    when(itemMetadataRepository.existsByImage(dto.getImage())).thenReturn(false);
+    when(itemMetadataRepository.existsByImageUrl(dto.getImageUrl())).thenReturn(false);
     when(itemMetadataMapper.toEntity(dto)).thenReturn(entity);
     when(itemMetadataRepository.save(entity)).thenReturn(entity);
     when(itemMetadataMapper.toDto(entity)).thenReturn(responseDto);
@@ -85,7 +81,7 @@ class ItemMetadataServiceTest {
     // given
     ItemMetadataRequestDto dto = ItemMetadataRequestDto.builder()
         .itemName("라바돈의 죽음모자")
-        .image("http://dummy.image.link/rabadon")
+        .imageUrl("http://dummy.image.link/rabadon")
         .detail("주문력 130\n"
             + " 신비한 작품\n"
             + " 총 주문력이 30% 증가합니다.")
@@ -105,14 +101,14 @@ class ItemMetadataServiceTest {
     // given
     ItemMetadataRequestDto dto = ItemMetadataRequestDto.builder()
         .itemName("라바돈의 죽음모자")
-        .image("http://dummy.image.link/rabadon")
+        .imageUrl("http://dummy.image.link/rabadon")
         .detail("주문력 130\n"
             + " 신비한 작품\n"
             + " 총 주문력이 30% 증가합니다.")
         .build();
 
     when(itemMetadataRepository.existsByItemName(dto.getItemName())).thenReturn(false);
-    when(itemMetadataRepository.existsByImage(dto.getImage())).thenReturn(true);
+    when(itemMetadataRepository.existsByImageUrl(dto.getImageUrl())).thenReturn(true);
 
     // when
     // then
@@ -127,7 +123,7 @@ class ItemMetadataServiceTest {
     ItemMetadata item1 = ItemMetadata.builder()
         .itemId(1L)
         .itemName("라바돈의 죽음모자")
-        .image("http://dummy.image.link/rabadon")
+        .imageUrl("http://dummy.image.link/rabadon")
         .detail("주문력 130\n"
             + " 신비한 작품\n"
             + " 총 주문력이 30% 증가합니다.")
@@ -136,7 +132,7 @@ class ItemMetadataServiceTest {
     ItemMetadata item2 = ItemMetadata.builder()
         .itemId(2L)
         .itemName("무한의 대검")
-        .image("http://dummy.image.link/infinity")
+        .imageUrl("http://dummy.image.link/infinity")
         .detail("공격력 65\n"
             + " 치명타 확률 25%\n"
             + " 치명타 피해량 40%")
@@ -173,7 +169,7 @@ class ItemMetadataServiceTest {
     ItemMetadata item = ItemMetadata.builder()
         .itemId(itemId)
         .itemName("라바돈의 죽음모자")
-        .image("http://dummy.image.link/rabadon")
+        .imageUrl("http://dummy.image.link/rabadon")
         .detail("주문력 130\n"
             + " 신비한 작품\n"
             + " 총 주문력이 30% 증가합니다.")
@@ -204,7 +200,7 @@ class ItemMetadataServiceTest {
     // then
     assertThatThrownBy(() -> itemMetadataService.readOne(999L))
         .isInstanceOf(ItemMetadataException.class)
-        .hasMessage(ITEM_NOT_FOUND.getMessage());
+        .hasMessage(ITEM_METADATA_NOT_FOUND.getMessage());
   }
 
   @Test
@@ -214,18 +210,18 @@ class ItemMetadataServiceTest {
     ItemMetadata item = ItemMetadata.builder()
         .itemId(itemId)
         .itemName("Sword")
-        .image("sword.png")
+        .imageUrl("sword.png")
         .detail("old detail")
         .build();
 
     ItemMetadataPatchRequestDto dto = new ItemMetadataPatchRequestDto();
     dto.setItemName("New Sword");
-    dto.setImage("new-sword.png");
+    dto.setImageUrl("new-sword.png");
     dto.setDetail("new detail");
 
     when(itemMetadataRepository.findById(itemId)).thenReturn(Optional.of(item));
     when(itemMetadataRepository.existsByItemName("New Sword")).thenReturn(false);
-    when(itemMetadataRepository.existsByImage("new-sword.png")).thenReturn(false);
+    when(itemMetadataRepository.existsByImageUrl("new-sword.png")).thenReturn(false);
 
     ItemMetadataResponseDto expected = new ItemMetadataResponseDto(itemId, "New Sword",
         "new-sword.png", "new detail");
@@ -236,7 +232,7 @@ class ItemMetadataServiceTest {
 
     // then
     assertThat(result.getItemName()).isEqualTo("New Sword");
-    assertThat(result.getImage()).isEqualTo("new-sword.png");
+    assertThat(result.getImageUrl()).isEqualTo("new-sword.png");
     assertThat(result.getDetail()).isEqualTo("new detail");
   }
 
@@ -253,7 +249,7 @@ class ItemMetadataServiceTest {
     // then
     assertThatThrownBy(() -> itemMetadataService.patch(itemId, dto))
         .isInstanceOf(ItemMetadataException.class)
-        .hasMessage(ITEM_NOT_FOUND.getMessage());
+        .hasMessage(ITEM_METADATA_NOT_FOUND.getMessage());
   }
 
   @Test
@@ -263,7 +259,7 @@ class ItemMetadataServiceTest {
     ItemMetadata item = ItemMetadata.builder()
         .itemId(itemId)
         .itemName("Sword")
-        .image("sword.png")
+        .imageUrl("sword.png")
         .detail("detail")
         .build();
 
@@ -287,7 +283,7 @@ class ItemMetadataServiceTest {
     ItemMetadata item = ItemMetadata.builder()
         .itemId(itemId)
         .itemName("Sword")
-        .image("sword.png")
+        .imageUrl("sword.png")
         .detail("detail")
         .build();
 
@@ -310,6 +306,6 @@ class ItemMetadataServiceTest {
     // then
     assertThatThrownBy(() -> itemMetadataService.delete(itemId))
         .isInstanceOf(ItemMetadataException.class)
-        .hasMessage(ITEM_NOT_FOUND.getMessage());
+        .hasMessage(ITEM_METADATA_NOT_FOUND.getMessage());
   }
 }

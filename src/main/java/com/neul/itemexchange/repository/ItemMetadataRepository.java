@@ -1,7 +1,8 @@
 package com.neul.itemexchange.repository;
 
 import com.neul.itemexchange.domain.ItemMetadata;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ItemMetadataRepository extends JpaRepository<ItemMetadata, Long> {
@@ -10,7 +11,7 @@ public interface ItemMetadataRepository extends JpaRepository<ItemMetadata, Long
 
   boolean existsByItemName(String itemName);
 
-  boolean existsByImage(String image);
+  boolean existsByImageUrl(String imageUrl);
 
   List<ItemMetadata> findAll();
 }

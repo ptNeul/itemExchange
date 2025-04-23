@@ -1,4 +1,4 @@
-package com.neul.itemexchange.dto.itemmetadata;
+package com.neul.itemexchange.dto.itemListing;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ItemMetadataRequestDto {
+public class ItemListingPatchRequestDto {
 
-  private String itemName;
-  private String imageUrl;
-  private String detail;
+  private int price;
+  private int quantity;
 }

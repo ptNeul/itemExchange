@@ -1,9 +1,17 @@
 package com.neul.itemexchange.domain;
 
-import com.neul.itemexchange.dto.user.UserPatchRequestDto;
 import com.neul.itemexchange.type.UserRole;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * 어드민 계정 등록

@@ -23,7 +23,8 @@ public class SecurityConfig {
                 "/admins",
                 "/users",
                 "/users/sessions",
-                "/users/register"
+                "/users/register",
+                "/item-listings/**"
             ).permitAll()
             .requestMatchers("/admins/**").hasRole("ADMIN") // 관리자
             .requestMatchers("/sellers/**").hasRole("SELLER") // 판매자
@@ -31,10 +32,10 @@ public class SecurityConfig {
             .anyRequest().authenticated()
         )
         .formLogin(AbstractHttpConfigurer::disable)
-        .logout(logout -> logout
-            .logoutUrl("/user/sessions") // 로그아웃 시 이동
-            .invalidateHttpSession(true) // 세션 무효화
-            .deleteCookies("JSESSIONID") // 세션 쿠키 삭제
+        .sessionManagement(session -> session
+            .sessionFixation().migrateSession()
+            .maximumSessions(1)
+            .maxSessionsPreventsLogin(false)
         );
 
     return http.build();
@@ -46,7 +47,8 @@ public class SecurityConfig {
   }
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+      throws Exception {
     return config.getAuthenticationManager();
   }
 }
