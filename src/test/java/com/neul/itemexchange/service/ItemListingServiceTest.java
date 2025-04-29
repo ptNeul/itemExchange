@@ -1,19 +1,30 @@
 package com.neul.itemexchange.service;
 
+import static com.neul.itemexchange.exception.custom.ItemListingErrorCode.CANNOT_MODIFY_COMPLETED_ITEM;
+import static com.neul.itemexchange.exception.custom.ItemListingErrorCode.INVALID_PRICE_RANGE;
+import static com.neul.itemexchange.exception.custom.ItemListingErrorCode.INVALID_PURCHASE_QUANTITY;
 import static com.neul.itemexchange.exception.custom.ItemListingErrorCode.ITEM_LISTING_NOT_FOUND;
+import static com.neul.itemexchange.exception.custom.ItemListingErrorCode.NOT_ENOUGH_ITEM_QUANTITY;
+import static com.neul.itemexchange.exception.custom.ItemListingErrorCode.PRICE_RANGE_REQUIRED;
 import static com.neul.itemexchange.exception.custom.ItemListingErrorCode.UNAUTHORIZED_ACCESS;
 import static com.neul.itemexchange.exception.custom.ItemMetadataErrorCode.ITEM_METADATA_NOT_FOUND;
 import static com.neul.itemexchange.exception.custom.UserErrorCode.USER_NOT_FOUND;
+import static com.neul.itemexchange.type.ItemListingStatus.COMPLETED;
 import static com.neul.itemexchange.type.ItemListingStatus.SALE;
+import static com.neul.itemexchange.type.UserRole.BUYER;
+import static com.neul.itemexchange.type.UserRole.SELLER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.neul.itemexchange.domain.ItemListing;
 import com.neul.itemexchange.domain.ItemMetadata;
+import com.neul.itemexchange.domain.ItemTradeHistory;
 import com.neul.itemexchange.domain.User;
 import com.neul.itemexchange.dto.itemListing.ItemListingPatchRequestDto;
 import com.neul.itemexchange.dto.itemListing.ItemListingRegisterRequestDto;
@@ -24,6 +35,7 @@ import com.neul.itemexchange.exception.custom.UserException;
 import com.neul.itemexchange.mapper.ItemListingMapper;
 import com.neul.itemexchange.repository.ItemListingRepository;
 import com.neul.itemexchange.repository.ItemMetadataRepository;
+import com.neul.itemexchange.repository.ItemTradeHistoryRepository;
 import com.neul.itemexchange.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -37,19 +49,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ItemListingServiceTest {
 
   @InjectMocks
-  ItemListingService itemListingService;
+  private ItemListingService itemListingService;
 
   @Mock
-  UserRepository userRepository;
+  private UserService userService;
 
   @Mock
-  ItemMetadataRepository itemMetadataRepository;
+  private UserRepository userRepository;
 
   @Mock
-  ItemListingRepository itemListingRepository;
+  private ItemMetadataRepository itemMetadataRepository;
 
   @Mock
-  ItemListingMapper itemListingMapper;
+  private ItemListingRepository itemListingRepository;
+
+  @Mock
+  private ItemListingMapper itemListingMapper;
+
+  @Mock
+  private ItemTradeHistoryRepository itemTradeHistoryRepository;
 
   @Test
   void create() {
@@ -150,7 +168,7 @@ class ItemListingServiceTest {
   }
 
   @Test
-  void getMyListing() {
+  void getMyListings() {
     // given
     String username = "seller1";
     ItemListing listing = ItemListing.builder().build();
@@ -170,7 +188,7 @@ class ItemListingServiceTest {
   }
 
   @Test
-  void getAllListing() {
+  void getAllListings() {
     // given
     ItemListing listing = ItemListing.builder().build();
     ItemListingResponseDto dto = ItemListingResponseDto.builder().listingId(1L).build();
@@ -221,6 +239,60 @@ class ItemListingServiceTest {
 
     verify(itemListingRepository).findById(id);
     verify(itemListingMapper, never()).toDto(any());
+  }
+
+  @Test
+  void getFilteredListings() {
+    // given
+    String itemName = "아이템";
+    Integer min = 1000;
+    Integer max = 5000;
+
+    ItemListing item = mock(ItemListing.class);
+    ItemListingResponseDto dto = mock(ItemListingResponseDto.class);
+
+    when(
+        itemListingRepository.findByItemMetadata_ItemNameContainingAndPriceBetweenOrderByStatusAscPriceAsc(
+            itemName, min, max)).thenReturn(List.of(item));
+    when(itemListingMapper.toDto(item)).thenReturn(dto);
+
+    // when
+    List<ItemListingResponseDto> result = itemListingService.getFilteredListings(itemName, min,
+        max);
+
+    // then
+    assertThat(result).hasSize(1);
+    verify(
+        itemListingRepository).findByItemMetadata_ItemNameContainingAndPriceBetweenOrderByStatusAscPriceAsc(
+        itemName, min, max);
+  }
+
+  @Test
+  void getFilteredListings_priceRangeRequired() {
+    // given
+    String itemName = "아이템";
+    Integer min = 1000;
+    Integer max = null;
+
+    // when
+    // then
+    assertThatThrownBy(() -> itemListingService.getFilteredListings(itemName, min, max))
+        .isInstanceOf(ItemListingException.class)
+        .hasMessage(PRICE_RANGE_REQUIRED.getMessage());
+  }
+
+  @Test
+  void getFilteredListings_invalidPriceRange() {
+    // given
+    String itemName = "아이템";
+    Integer min = 5000;
+    Integer max = 1000;
+
+    // when
+    // then
+    assertThatThrownBy(() -> itemListingService.getFilteredListings(itemName, min, max))
+        .isInstanceOf(ItemListingException.class)
+        .hasMessage(INVALID_PRICE_RANGE.getMessage());
   }
 
   @Test
@@ -319,6 +391,39 @@ class ItemListingServiceTest {
   }
 
   @Test
+  void patch_cannotModifyCompletedItem() {
+    // given
+    Long listingId = 1L;
+    String username = "seller1";
+
+    ItemListingPatchRequestDto dto = ItemListingPatchRequestDto.builder()
+        .price(3000)
+        .quantity(10)
+        .build();
+
+    User seller = User.builder().username(username).build();
+
+    ItemListing listing = ItemListing.builder()
+        .listingId(listingId)
+        .price(2000)
+        .quantity(5)
+        .status(COMPLETED)
+        .seller(seller)
+        .build();
+
+    when(itemListingRepository.findById(listingId)).thenReturn(Optional.of(listing));
+
+    // when
+    // then
+    assertThatThrownBy(() -> itemListingService.patch(listingId, dto, username))
+        .isInstanceOf(ItemListingException.class)
+        .hasMessage(CANNOT_MODIFY_COMPLETED_ITEM.getMessage());
+
+    verify(itemListingRepository).findById(listingId);
+    verify(itemListingMapper, never()).toDto(any());
+  }
+
+  @Test
   void delete() {
     // given
     Long listingId = 1L;
@@ -381,5 +486,157 @@ class ItemListingServiceTest {
 
     verify(itemListingRepository).findById(listingId);
     verify(itemListingRepository, never()).delete(any());
+  }
+
+  @Test
+  void purchase() {
+    // given
+    Long listingId = 1L;
+    String buyerUsername = "buyer1";
+    int quantity = 2;
+
+    User buyer = User.builder()
+        .username(buyerUsername)
+        .balance(10000L)
+        .role(BUYER)
+        .build();
+
+    User seller = User.builder()
+        .username("seller1")
+        .balance(5000L)
+        .role(SELLER)
+        .build();
+
+    ItemListing listing = ItemListing.builder()
+        .listingId(listingId)
+        .price(3000)
+        .quantity(5)
+        .seller(seller)
+        .status(SALE)
+        .build();
+
+    when(itemListingRepository.findById(listingId)).thenReturn(Optional.of(listing));
+    when(userRepository.findById(buyerUsername)).thenReturn(Optional.of(buyer));
+
+    // when
+    itemListingService.purchase(listingId, buyerUsername, quantity);
+
+    // then
+    verify(itemListingRepository).findById(listingId);
+    verify(userRepository).findById(buyerUsername);
+    verify(userService).transferBalance(buyerUsername, seller.getUsername(), 6000L);
+    verify(itemTradeHistoryRepository).save(any(ItemTradeHistory.class));
+    assertThat(listing.getQuantity()).isEqualTo(3);
+  }
+
+  @Test
+  void purchase_invalidPurchaseQuantity() {
+    // given
+    Long listingId = 1L;
+    String buyerUsername = "buyer1";
+    int invalidQuantity = 0;
+
+    // when
+    // then
+    assertThatThrownBy(() -> itemListingService.purchase(listingId, buyerUsername, invalidQuantity))
+        .isInstanceOf(ItemListingException.class)
+        .hasMessage(INVALID_PURCHASE_QUANTITY.getMessage());
+
+    verify(itemMetadataRepository, never()).findById(any());
+    verify(userRepository, never()).findById(any());
+    verify(userService, never()).transferBalance(any(), any(), anyLong());
+    verify(itemTradeHistoryRepository, never()).save(any());
+  }
+
+  @Test
+  void purchase_itemListingNotFound() {
+    // given
+    Long listingId = 1L;
+    String buyerUsername = "buyer1";
+    int quantity = 1;
+
+    when(itemListingRepository.findById(listingId)).thenReturn(Optional.empty());
+
+    // when
+    // then
+    assertThatThrownBy(() -> itemListingService.purchase(listingId, buyerUsername, quantity))
+        .isInstanceOf(ItemListingException.class)
+        .hasMessage(ITEM_LISTING_NOT_FOUND.getMessage());
+
+    verify(itemListingRepository).findById(listingId);
+    verify(userRepository, never()).findById(any());
+    verify(userService, never()).transferBalance(any(), any(), anyLong());
+    verify(itemTradeHistoryRepository, never()).save(any());
+  }
+
+  @Test
+  void purchase_userNotFound() {
+    // given
+    Long listingId = 1L;
+    String buyerUsername = "ghost";
+    int quantity = 1;
+
+    User seller = User.builder().username("seller1").build();
+
+    ItemListing listing = ItemListing.builder()
+        .listingId(listingId)
+        .price(1000)
+        .quantity(10)
+        .seller(seller)
+        .build();
+
+    when(itemListingRepository.findById(listingId)).thenReturn(Optional.of(listing));
+    when(userRepository.findById(buyerUsername)).thenReturn(Optional.empty());
+
+    // when
+    // then
+    assertThatThrownBy(() -> itemListingService.purchase(listingId, buyerUsername, quantity))
+        .isInstanceOf(UserException.class)
+        .hasMessage(USER_NOT_FOUND.getMessage());
+
+    verify(itemListingRepository).findById(listingId);
+    verify(userRepository).findById(buyerUsername);
+    verify(userService, never()).transferBalance(any(), any(), anyLong());
+    verify(itemTradeHistoryRepository, never()).save(any());
+  }
+
+  @Test
+  void purchase_notEnoughItemQuantity() {
+    // given
+    Long listingId = 1L;
+    String buyerUsername = "buyer1";
+    int quantity = 10;
+
+    User buyer = User.builder()
+        .username(buyerUsername)
+        .balance(100000L)
+        .role(BUYER)
+        .build();
+
+    User seller = User.builder()
+        .username("seller1")
+        .role(SELLER)
+        .build();
+
+    ItemListing listing = ItemListing.builder()
+        .listingId(listingId)
+        .price(1000)
+        .quantity(5)
+        .seller(seller)
+        .build();
+
+    when(itemListingRepository.findById(listingId)).thenReturn(Optional.of(listing));
+    when(userRepository.findById(buyerUsername)).thenReturn(Optional.of(buyer));
+
+    // when
+    // then
+    assertThatThrownBy(() -> itemListingService.purchase(listingId, buyerUsername, quantity))
+        .isInstanceOf(ItemListingException.class)
+        .hasMessage(NOT_ENOUGH_ITEM_QUANTITY.getMessage());
+
+    verify(itemListingRepository).findById(listingId);
+    verify(userRepository).findById(buyerUsername);
+    verify(userService, never()).transferBalance(any(), any(), anyLong());
+    verify(itemTradeHistoryRepository, never()).save(any());
   }
 }

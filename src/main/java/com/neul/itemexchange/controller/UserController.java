@@ -1,6 +1,7 @@
 package com.neul.itemexchange.controller;
 
 import static org.springframework.http.HttpStatus.*;
+import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 import com.neul.itemexchange.dto.user.UserPatchRequestDto;
 import com.neul.itemexchange.dto.user.UserRegisterRequestDto;
@@ -35,7 +36,7 @@ public class UserController {
       HttpSession session) {
     UserResponseDto result = userService.login(dto);
     session.setAttribute(
-        HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+        SPRING_SECURITY_CONTEXT_KEY,
         SecurityContextHolder.getContext()
     );
     return ResponseEntity.ok(result);

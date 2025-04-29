@@ -37,6 +37,8 @@ create table item_trade_history (
   created_at timestamp not null default current_timestamp,
   listing_id bigint not null,
   buyer_id varchar(50) not null,
+  quantity int not null,
+  total_price bigint not null,
   foreign key (listing_id) references item_listing(listing_id),
   foreign key (buyer_id) references user(username)
 );

@@ -1,5 +1,7 @@
 package com.neul.itemexchange.domain;
 
+import static com.neul.itemexchange.type.ItemListingStatus.COMPLETED;
+
 import com.neul.itemexchange.type.ItemListingStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,4 +50,12 @@ public class ItemListing {
   @Enumerated(EnumType.ORDINAL)
   @Column(nullable = false)
   private ItemListingStatus status;
+
+  public void decreaseQuantity(int amount) {
+    this.quantity -= amount;
+  }
+
+  public void markAsCompleted() {
+    this.status = COMPLETED;
+  }
 }

@@ -3,6 +3,7 @@ package com.neul.itemexchange.controller;
 import com.neul.itemexchange.dto.itemListing.ItemListingPatchRequestDto;
 import com.neul.itemexchange.dto.itemListing.ItemListingRegisterRequestDto;
 import com.neul.itemexchange.dto.itemListing.ItemListingResponseDto;
+import com.neul.itemexchange.dto.itemListing.ItemPurchaseRequestDto;
 import com.neul.itemexchange.service.ItemListingService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -56,6 +58,16 @@ public class ItemListingController {
     return ResponseEntity.ok(result);
   }
 
+  @GetMapping("/search")
+  public ResponseEntity<List<ItemListingResponseDto>> getFilteredListings(
+      @RequestParam(required = false) String itemName,
+      @RequestParam(required = false) Integer min,
+      @RequestParam(required = false) Integer max) {
+    List<ItemListingResponseDto> result = itemListingService.getFilteredListings(
+        itemName, min, max);
+    return ResponseEntity.ok(result);
+  }
+
   @PatchMapping("/{listingId}")
   public ResponseEntity<ItemListingResponseDto> patch(
       @PathVariable Long listingId,
@@ -73,5 +85,15 @@ public class ItemListingController {
       @AuthenticationPrincipal UserDetails userDetails) {
     itemListingService.delete(listingId, userDetails.getUsername());
     return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/{listingId}/purchase")
+  @PreAuthorize("hasRole('BUYER')")
+  public ResponseEntity<Void> purchase(
+      @PathVariable Long listingId,
+      @RequestBody ItemPurchaseRequestDto dto,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    itemListingService.purchase(listingId, userDetails.getUsername(), dto.getQuantity());
+    return ResponseEntity.ok().build();
   }
 }

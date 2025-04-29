@@ -2,9 +2,11 @@ package com.neul.itemexchange.exception.custom;
 
 import com.neul.itemexchange.exception.ErrorCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
+@RequiredArgsConstructor
 public enum ItemMetadataErrorCode implements ErrorCode {
 
   DUPLICATE_ITEM_NAME(HttpStatus.BAD_REQUEST, "같은 이름의 아이템이 이미 존재합니다."),
@@ -13,9 +15,4 @@ public enum ItemMetadataErrorCode implements ErrorCode {
 
   private final HttpStatus status;
   private final String message;
-
-  ItemMetadataErrorCode(HttpStatus status, String message) {
-    this.status = status;
-    this.message = message;
-  }
 }

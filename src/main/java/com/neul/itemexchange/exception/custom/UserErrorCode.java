@@ -2,9 +2,11 @@ package com.neul.itemexchange.exception.custom;
 
 import com.neul.itemexchange.exception.ErrorCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
+@RequiredArgsConstructor
 public enum UserErrorCode implements ErrorCode {
   ALREADY_CREATED_ADMIN(HttpStatus.BAD_REQUEST, "관리자 계정은 이미 존재합니다."),
   DUPLICATE_USERNAME(HttpStatus.BAD_REQUEST, "이미 존재하는 아이디입니다."),
@@ -20,9 +22,4 @@ public enum UserErrorCode implements ErrorCode {
 
   private final HttpStatus status;
   private final String message;
-
-  UserErrorCode(HttpStatus status, String message) {
-    this.status = status;
-    this.message = message;
-  }
 }

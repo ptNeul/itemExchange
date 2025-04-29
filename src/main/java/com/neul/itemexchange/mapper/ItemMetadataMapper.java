@@ -16,12 +16,12 @@ public class ItemMetadataMapper {
         .build();
   }
 
-  public ItemMetadataResponseDto toDto(ItemMetadata item) {
+  public ItemMetadataResponseDto toDto(ItemMetadata entity) {
     return ItemMetadataResponseDto.builder()
-        .itemId(item.getItemId())
-        .itemName(item.getItemName())
-        .imageUrl(item.getImageUrl())
-        .detail(item.getDetail())
+        .itemId(entity.getItemId())
+        .itemName(entity.getItemName())
+        .imageUrl(entity.getImageUrl())
+        .detail(entity.getDetail())
         .build();
   }
 }

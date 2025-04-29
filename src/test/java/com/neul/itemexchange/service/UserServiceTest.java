@@ -29,7 +29,6 @@ import com.neul.itemexchange.mapper.UserMapper;
 import com.neul.itemexchange.repository.SellerRepository;
 import com.neul.itemexchange.repository.UserRepository;
 import com.neul.itemexchange.security.CustomUserDetails;
-import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,9 +60,6 @@ class UserServiceTest {
 
   @Mock
   private UserMapper userMapper;
-
-  @Mock
-  private HttpSession session;
 
   @Test
   void registerAdmin() {
