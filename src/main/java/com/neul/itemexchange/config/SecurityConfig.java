@@ -24,7 +24,8 @@ public class SecurityConfig {
                 "/users",
                 "/users/sessions",
                 "/users/register",
-                "/item-listings/**"
+                "/item-listings/**",
+                "test/upload"
             ).permitAll()
             .requestMatchers("/admins/**").hasRole("ADMIN") // 관리자
             .requestMatchers("/sellers/**").hasRole("SELLER") // 판매자
